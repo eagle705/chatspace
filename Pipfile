@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+flake8-bugbear = "*"
+black = "*"
+pydocstyle = "*"
+isort = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[packages]
+torch = ">=1.1.0"
+sklearn = "*"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
+
+[scripts]
+check-doc = "pydocstyle chatspace"
+check-black = "black chatspace --check"
+check-flake = "flake8 chatspace"
+check-isort = "isort -rc -c ."
+format-black = "black chatspace"
+format-isort = "isort -rc ."
+test = "pytest"

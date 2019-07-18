@@ -1,0 +1,5 @@
+graft chatspace/resource
+
+include LICENSE
+
+include README.rst
