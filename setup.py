@@ -11,7 +11,7 @@ setup(
     author_mail="hello@scatterlab.co.kr",
     url="https://github.com/pingpong-ai/chatspace",
     install_requires=[
-        "torch>=1.1.0"
+        "torch"
     ],
     packages=find_packages(exclude=['tests']),
     keywords=["spaceing", "korean", "pingpong"],
