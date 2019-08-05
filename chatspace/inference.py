@@ -158,10 +158,14 @@ class ChatSpace:
         아니면 state_dict 로 저장된 dictionary를 불러올지 설정
         :return: 로딩된 모델을 return
         """
-        if not from_jit:
-            model = self._load_model_from_dict(model_path, device)
+        if from_jit:
+            try:
+                model = self._load_model_from_jit(model_path)
+            except RuntimeError:
+                print("Failed to load jit compiled model. Please set ChatSpace(as_jit=False)")
+                model = self._load_model_from_dict(model_path, device)
         else:
-            model = self._load_model_from_jit(model_path)
+            model = self._load_model_from_dict(model_path, device)
         return model.to(device)
 
     def _load_model_from_dict(self, model_path: str, device: torch.device) -> ChatSpaceModel:
@@ -175,14 +179,7 @@ class ChatSpace:
         print("Loading ChatSpace Model Weight")
         model = ChatSpaceModel(self.config)
         state_dict = torch.load(model_path, map_location=device)
-
-        if self._get_torch_version() < 100:
-            try:
-                del state_dict["batch_normalization.num_batches_tracked"]
-            except KeyError:
-                pass
-
-        model.load_state_dict(state_dict)
+        model.load_state_dict(state_dict, strict=False)
         return model
 
     def _load_model_from_jit(self, model_path: str) -> Union[torch.jit.ScriptModule, nn.Module]:

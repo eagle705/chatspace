@@ -2,9 +2,11 @@ dist: xenial
 language: python
 python:
   - "3.6"
-  - "3.7"
 env:
   - PYTORCH_VERSION=1.1.0
+  - PYTORCH_VERSION=1.0.1
+  - PYTORCH_VERSION=1.0.0
+  - PYTORCH_VERSION=0.4.1
 install:
   - pip install "torch==$PYTORCH_VERSION" sklearn
   - pip install pytest pytest-cov codecov
