@@ -35,7 +35,8 @@ class Vocab(dict):
         at last, special_tokens will be allocated at last position.
 
         :param tokens: list or tuple of tokens(str)
-        :param special_tokens: tuple of string, which indicate the special tokens
+        :param forward_special_tokens: tuple of string, which indicate the special tokens appended in forward
+        :param backward_special_tokens: tuple of string, which indicate the special tokens appended in backward
         """
         super().__init__()
 

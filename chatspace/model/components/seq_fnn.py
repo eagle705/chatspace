@@ -24,7 +24,7 @@ class SequentialFNN(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.time_distributed_1 = TimeDistributed(
-            nn.Linear(in_features=config["cnn_features"] * 2, out_features=config["cnn_features"])
+            nn.Linear(in_features=config["cnn_features"] * 4, out_features=config["cnn_features"])
         )
         self.time_distributed_2 = TimeDistributed(
             nn.Linear(in_features=config["cnn_features"], out_features=config["cnn_features"] // 2)

@@ -32,9 +32,7 @@ class ChatSpaceModel(nn.Module):
         self.lstm = CharLSTM(config)
         self.projection = Projection(config)
         self.fnn = SequentialFNN(config)
-
-        self.dropout = nn.Dropout(config["dropout_keep_prob"])
-        self.batch_normalization = nn.BatchNorm1d(2 * config["cnn_features"])
+        self.batch_normalization = nn.BatchNorm1d(4 * config["cnn_features"])
         self.layer_normalization = nn.LayerNorm(config["cnn_features"])
 
     def forward(self, input_seq, length) -> torch.Tensor:

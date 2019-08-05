@@ -19,8 +19,8 @@ def check_speed(spacer, text):
 
 
 def test_space(spacer):
-    assert spacer.space("안녕 내이름은 뽀로로야") == "안녕 내 이름은 뽀로로야"
-    assert spacer.space("만나서 반가워!") == "만나서 반가워!"
+    assert spacer.space("안녕내이름은뽀로로야") == "안녕 내 이름은 뽀로로야"
+    assert spacer.space("만나서반가워!") == "만나서 반가워!"
 
 
 def test_time(spacer):

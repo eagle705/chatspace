@@ -26,7 +26,7 @@ Requirements
 
 .. code-block:: text
 
-    torch>=1.1.0
+    torch
 
 
 Installation

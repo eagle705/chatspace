@@ -61,20 +61,25 @@ class ChatSpaceTrainer:
         self.model.eval()
 
         with torch.no_grad():
-            eval_output = self.run_epoch(self.eval_dataset, batch_size, False)
+            eval_output = self.run_epoch(self.eval_dataset, batch_size=batch_size, is_train=False)
 
         self.model.train()
         return eval_output
 
     def train(self, epochs=10, batch_size=64):
         for epoch_id in range(epochs):
-            self.run_epoch(self.train_dataset, batch_size, epoch_id)
-
+            self.run_epoch(
+                self.train_dataset,
+                batch_size=batch_size,
+                epoch_id=epoch_id,
+                is_train=True,
+                log_freq=self.config["logging_step"],
+            )
             self.save_checkpoint(f"outputs/checkpoints/checkpoint_ep{epoch_id}.cpt")
             self.save_model(f"outputs/models/chatspace_ep{epoch_id}.pt")
-            self.save_model(f"outputs/jit_models/chatspace_ep{epoch_id}.pt", as_jit=True)
+            self.save_model(f"outputs/jit_models/chatspace_ep{epoch_id}.pt", as_jit=False)
 
-    def run_epoch(self, dataset, batch_size=64, epoch_id=0, is_train=True, log_freq=50):
+    def run_epoch(self, dataset, batch_size=64, epoch_id=0, is_train=True, log_freq=100):
         step_outputs, step_metrics, step_inputs = [], [], []
         collect_fn = (
             ChatSpaceDataset.train_collect_fn if is_train else ChatSpaceDataset.eval_collect_fn
@@ -94,7 +99,11 @@ class ChatSpaceTrainer:
                 metric = self.step_metric(output["output"], batch, output["loss"])
 
                 if is_train:
-                    print(f"EPOCH:{epoch_id}", f"STEP:{step_num}/{len(data_loader)}", metric)
+                    print(
+                        f"EPOCH:{epoch_id}",
+                        f"STEP:{step_num}/{len(data_loader)}",
+                        [(key + ":" + "%.3f" % metric[key]) for key in metric],
+                    )
                 else:
                     step_outputs.append(output)
                     step_metrics.append(metric)
@@ -185,7 +194,7 @@ class ChatSpaceTrainer:
 
                 self.model.to(self.device).train()
 
-        print(f"Model Saved on {path}{'as_jit' if as_jit else ''}")
+        print(f"Model Saved on {path}{' as_jit' if as_jit else ''}")
 
         for param in params:
             if param["require_grad"]:
@@ -208,3 +217,6 @@ class ChatSpaceTrainer:
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.global_epochs = checkpoint["epoch"]
         self.global_steps = checkpoint["steps"]
+
+    def load_model(self, model_path):
+        self.model.load_state_dict(torch.load(model_path))

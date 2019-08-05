@@ -19,8 +19,8 @@ import os
 RESOURCE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 VOCAB_PATH = os.path.join(RESOURCE_PATH, "vocab.txt")
-MODEL_PATH = os.path.join(RESOURCE_PATH, "model/model.pt")
-JIT_MODEL_PATH = os.path.join(RESOURCE_PATH, "model/model.jit.pt")
+MODEL_DICT_PATH = os.path.join(RESOURCE_PATH, "model/model.pt")
+JIT_MODEL_PATH = os.path.join(RESOURCE_PATH, "model/model_jit.pt")
 CONFIG_PATH = os.path.join(RESOURCE_PATH, "config.json")
 
-__all__ = ["RESOURCE_PATH", "CONFIG_PATH", "VOCAB_PATH", "MODEL_PATH", "JIT_MODEL_PATH"]
+__all__ = ["RESOURCE_PATH", "CONFIG_PATH", "VOCAB_PATH", "MODEL_DICT_PATH", "JIT_MODEL_PATH"]

@@ -25,13 +25,13 @@ from torch.utils.data import DataLoader
 from .data import ChatSpaceDataset
 from .data.vocab import Vocab
 from .model import ChatSpaceModel
-from .resource import CONFIG_PATH, JIT_MODEL_PATH, VOCAB_PATH
+from .resource import CONFIG_PATH, JIT_MODEL_PATH, MODEL_DICT_PATH, VOCAB_PATH
 
 
 class ChatSpace:
     def __init__(
         self,
-        model_path: str = JIT_MODEL_PATH,
+        model_path: str = None,
         config_path: str = CONFIG_PATH,
         vocab_path: str = VOCAB_PATH,
         device: str = "cpu",
@@ -40,7 +40,13 @@ class ChatSpace:
         self.config = self._load_config(config_path)
         self.vocab = self._load_vocab(vocab_path)
         self.device = torch.device(device)
+
+        if model_path is None:
+            from_jit = self._is_jit_available() if from_jit else False
+            model_path = JIT_MODEL_PATH if from_jit else MODEL_DICT_PATH
+
         self.model = self._load_model(model_path, self.device, from_jit=from_jit)
+        self.model.eval()
 
     def space(self, texts: Union[List[str], str], batch_size: int = 64) -> Union[List[str], str]:
         """
@@ -125,6 +131,23 @@ class ChatSpace:
         joined_chars = "".join(generated_sentence)
         return re.sub(r" {2,}", " ", joined_chars).strip()
 
+    def _get_torch_version(self) -> int:
+        """
+        string 으로 되어있는 torch version 을 비교할 수 있도록 int로 변환
+
+        :return: torch 버젼의 int version
+        """
+        version_string = "".join(re.findall(r"[0-9]+", torch.__version__))
+        return int(version_string)
+
+    def _is_jit_available(self) -> bool:
+        """
+        jit을 이용해서 모델 로딩이 가능한 pytorch 버전인지 체크하기
+
+        :return: jit 모델 가능 여부 (bool)
+        """
+        return self._get_torch_version() >= 110
+
     def _load_model(self, model_path: str, device: torch.device, from_jit: bool) -> nn.Module:
         """
         저장된 ChatSpace 모델을 불러오는 함수
@@ -136,16 +159,50 @@ class ChatSpace:
         :return: 로딩된 모델을 return
         """
         if not from_jit:
-            print("Loading ChatSpace Model Weight")
-            model = ChatSpaceModel(self.config)
-            state_dict = torch.load(model_path, map_location=device)
-            model.load_state_dict(state_dict)
+            model = self._load_model_from_dict(model_path, device)
         else:
-            print("Loading JIT Compiled ChatSpace Model")
-            model = torch.jit.load(model_path)
+            model = self._load_model_from_jit(model_path)
         return model.to(device)
 
+    def _load_model_from_dict(self, model_path: str, device: torch.device) -> ChatSpaceModel:
+        """
+        torch.save(model.state_dict()) 로 저장된 state_dict 를 이용해 모델 로딩
+
+        :param model_path: 모델 weight 가 저장되어 있는 위치
+        :param device: 어떤 device 에 모델 weight 를 바로 위치시킬 지
+        :return: weight 가 로딩된 ChatSpace 모델 (nn.Module)
+        """
+        print("Loading ChatSpace Model Weight")
+        model = ChatSpaceModel(self.config)
+        state_dict = torch.load(model_path)
+
+        if self._get_torch_version() < 100:
+            try:
+                del state_dict["batch_normalization.num_batches_tracked"]
+            except KeyError:
+                pass
+
+        model.load_state_dict(state_dict)
+        return model
+
+    def _load_model_from_jit(self, model_path: str) -> Union[torch.jit.ScriptModule, nn.Module]:
+        """
+        torch.jit.save(traced_model) 로 저장된 jit compiled 모델 로딩
+
+        :param model_path: 모델 파일 위치
+        :return: jit traced ScriptModule
+        """
+        print("Loading JIT Compiled ChatSpace Model")
+        model = torch.jit.load(model_path)
+        return model
+
     def _load_vocab(self, vocab_path: str) -> Vocab:
+        """
+        저장된 vocab 을 로딩
+
+        :param vocab_path: vocab 위치
+        :return: 로딩된 vocab
+        """
         with open(vocab_path) as f:
             vocab_tokens = [line.strip() for line in f]
         vocab = Vocab(tokens=vocab_tokens)
@@ -153,5 +210,11 @@ class ChatSpace:
         return vocab
 
     def _load_config(self, config_path: str) -> dict:
+        """
+        저장된 config 을 로딩
+
+        :param config_path: config 위치
+        :return: 로딩된 config
+        """
         with open(config_path) as f:
             return json.load(f)

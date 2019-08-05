@@ -36,6 +36,7 @@ class Indexer:
         max_seq_len: Optional[int] = None,
         min_seq_len: Optional[int] = None,
         pad_idx: int = 0,
+        unk_word: str = "[UNK]",
     ) -> Union[List[int], str]:
         """
         Convert tokenized tokens to corresponding ids.
@@ -50,9 +51,10 @@ class Indexer:
         :param max_seq_len : maximum sequence length of encoded tokens.
             if encoded tokens are longer then max_seq_len then slice it.
         :param pad_idx: padding token index(int) for padding
+        :param unk_word: get unk index with unk_word word as key
         :return: list of token ids (int)
         """
-        unk_token_id = self.vocab.get("[UNK]")
+        unk_token_id = self.vocab.get(unk_word)
         encoded_text = [self.vocab.get(token, unk_token_id) for token in text]
         if min_seq_len is not None and len(encoded_text) < min_seq_len:
             encoded_text.extend((pad_idx,) * (min_seq_len - len(encoded_text)))

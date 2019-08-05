@@ -5,7 +5,7 @@ with open("README.rst") as f:
 
 setup(
     name="chatspace",
-    version="1.0",
+    version="1.0.1",
     description="spacing model for korean text with chat-style",
     author="Suin Seo, Junseong Kim",
     author_mail="hello@scatterlab.co.kr",

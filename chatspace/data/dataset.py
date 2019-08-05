@@ -31,12 +31,11 @@ class ChatSpaceDataset(Dataset):
         config,
         texts: Union[DynamicCorpus, List[str]],
         vocab: Vocab,
-        space_prob: float = 0.25,
         with_random_space: bool = False,
     ):
         self.texts = texts
         self.indexer = Indexer(vocab)
-        self.space_prob = space_prob
+        self.space_prob = config["space_prob"]
         self.with_random_space = with_random_space
         self.config = config
         self.lines = []
@@ -46,15 +45,17 @@ class ChatSpaceDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.with_random_space:
-            model_input = self.get_train_input(self.texts[idx])
+            model_input = self.get_train_input(self.texts[idx], idx)
         else:
             model_input = {"input": list(self.texts[idx])}
 
-        model_input["input"] = self.indexer.encode(model_input["input"], min_seq_len=7)
+        model_input["input"] = self.indexer.encode(
+            model_input["input"], min_seq_len=self.config["min_seq_len"], unk_word="[UNK]"
+        )
         model_input["length"] = len(model_input["input"])
         return model_input
 
-    def get_train_input(self, input_text):
+    def get_train_input(self, input_text, idx):
         input_char, label = [], []
         word_list = input_text.split()
 
@@ -62,7 +63,7 @@ class ChatSpaceDataset(Dataset):
             word_label = [1] * (len(word) - 1) + [2]
             char_list = list(word)
 
-            if random.random() < self.space_prob:
+            if random.random() < self.space_prob[idx % len(self.space_prob)]:
                 char_list.append(" ")
                 word_label.append(1)
 

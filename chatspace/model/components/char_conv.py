@@ -31,8 +31,15 @@ class CharConvolution(nn.Module):
             out_channels=config["cnn_features"],
             kernel_size=config["cnn_filter"] * 2 + 1,
         )
+        self.conv3 = nn.Conv1d(
+            in_channels=config["cnn_features"] * 2,
+            out_channels=config["cnn_features"],
+            kernel_size=config["cnn_filter"] * 2 - 1,
+        )
+
         self.padding_1 = nn.ConstantPad1d(1, 0)
         self.padding_2 = nn.ConstantPad1d(3, 0)
+        self.padding_3 = nn.ConstantPad1d(2, 0)
 
     def forward(self, embed_input):
         embed_input = torch.transpose(embed_input, dim0=1, dim1=2)
@@ -40,4 +47,9 @@ class CharConvolution(nn.Module):
         conv1_paded = self.padding_1(conv1_output)
         conv2_output = self.conv2(conv1_paded)
         conv2_paded = self.padding_2(conv2_output)
-        return torch.cat((conv1_paded, conv2_paded), dim=1)
+        conv3_input = torch.cat((conv1_paded, conv2_paded), dim=1)
+        conv3_output1 = self.conv3(conv3_input)
+        conv3_paded1 = self.padding_3(conv3_output1)
+        conv3_output2 = self.conv3(embed_input)
+        conv3_paded2 = self.padding_3(conv3_output2)
+        return torch.cat((conv3_paded1, conv3_paded2, conv3_input), dim=1)
