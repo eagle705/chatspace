@@ -174,7 +174,7 @@ class ChatSpace:
         """
         print("Loading ChatSpace Model Weight")
         model = ChatSpaceModel(self.config)
-        state_dict = torch.load(model_path)
+        state_dict = torch.load(model_path, map_location=device)
 
         if self._get_torch_version() < 100:
             try:
