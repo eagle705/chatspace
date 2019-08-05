@@ -8,7 +8,7 @@ setup(
     version="1.0.1",
     description="spacing model for korean text with chat-style",
     author="Suin Seo, Junseong Kim",
-    author_mail="hello@scatterlab.co.kr",
+    author_email="developers@scatterlab.co.kr",
     url="https://github.com/pingpong-ai/chatspace",
     install_requires=[
         "torch"
