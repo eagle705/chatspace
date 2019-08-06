@@ -38,7 +38,7 @@ From GitHub
 
 .. code-block:: shell
 
-    pip install git+https://github.com/pingpong-ai/chatspace#egg=chatspace
+    pip install chatspace
 
 Detail Usage
 ------------
