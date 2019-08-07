@@ -48,7 +48,7 @@ Batch Inference
 
 .. code-block:: python
 
-    from chatspace
+    from chatspace import ChatSpace
 
     spacer = ChatSpace()
     texts = ["안녕 만나서반가워 내이름은뽀로로라고해", "와진짜대박", ...]
