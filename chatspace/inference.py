@@ -200,7 +200,7 @@ class ChatSpace:
         :param vocab_path: vocab 위치
         :return: 로딩된 vocab
         """
-        with open(vocab_path) as f:
+        with open(vocab_path, encoding='utf-8') as f:
             vocab_tokens = [line.strip() for line in f]
         vocab = Vocab(tokens=vocab_tokens)
         self.config["vocab_size"] = len(vocab)
